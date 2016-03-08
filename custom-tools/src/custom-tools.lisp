@@ -39,3 +39,6 @@
 		,@(loop for x below times collect string)))
 
 
+(defun uniquep (element list)
+  (= (- (length list) 1)
+     (length (remove element list :test #'equal))))
