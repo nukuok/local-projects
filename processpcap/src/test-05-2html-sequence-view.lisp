@@ -68,6 +68,13 @@
 	    (coerce ,seq 'list))
 	   'string))
 
+(defun get-message-type (sentence)
+  (let* ((splited-sentence (split-by sentence #\space))
+	 (first-word (car splited-sentence)))
+    (if (equal first-word "SIP/2.0")
+	(cadr splited-sentence)
+	first-word)))
+
 (defmacro push-to-messages (splitted-line array messages current-row-number)
   `(let ((message-to-push (cons ,array ,splitted-line))
 	 (row-number (+ 1 ,current-row-number)))
@@ -79,6 +86,35 @@
 (defun make-arrow (arrow index)
   (concatenate 'string arrow " F" (write-to-string index) " " arrow))
 
+(defun process-result-simple (result index)
+  (let ((message (caddar result))
+	(column-and-array (determine-column-and-array (caar result))))
+    (when result
+      (cond ((= column-and-array 1)
+	     (setf *right-current-row-number*
+		   (max *right-current-row-number*
+			(+ 1 *left-current-row-number*)))
+	     (push-to-messages (list (get-message-type (car (split-by-0a0d message))))
+			       (make-arrow *right-array* index)
+			       *left-messages* *left-current-row-number*))
+	    ((= column-and-array 2)
+	     (push-to-messages (list (get-message-type (car (split-by-0a0d message))))
+			       (make-arrow *left-array* index)
+			       *left-messages* *left-current-row-number*))
+	    ((= column-and-array 3)
+	     (push-to-messages (list (get-message-type (car (split-by-0a0d message))))
+			       (make-arrow *right-array* index)
+			       *right-messages* *right-current-row-number*))
+	    ((= column-and-array 4)
+	     (setf *left-current-row-number*
+		   (max *left-current-row-number*
+			(+ 1 *right-current-row-number*)))
+	     (push-to-messages (list (get-message-type (car (split-by-0a0d message))))
+			       (make-arrow *left-array* index)
+			       *right-messages* *right-current-row-number*)))
+      (if (< column-and-array 5)
+	  (process-result-simple (cdr result) (+ index 1))
+	  (process-result-simple (cdr result) index)))))
 
 (defun process-result (result index)
   (let ((message (caddar result))
@@ -285,16 +321,11 @@
 (defun output2html-string (filename)
   (let ((result (remove-messages-duplicates (pcap-process filename))))
     (message-list-initial)
+    (process-result-simple result 0)
+    (or (and (> *left-current-row-number* *right-current-row-number*)
+	     (setf *right-current-row-number* *left-current-row-number*))
+	(setf *left-current-row-number* *right-current-row-number*))
     (process-result result 0)
- ;;   (with-open-file
-;;	(outstream (concatenate 'string (subseq filename 0 (position #\. filename))
-;;				"-d/result.html")
-	;;(outstream (concatenate 'string
-	;;			filename
-	;;			"-d/result.html")
-;;		   :direction :output
-;;		   :if-exists :supersede
-;;		   :if-does-not-exist :create)
     (let ((outstream (make-string-output-stream)))
       (output-html-header outstream)
       (output-tr outstream
