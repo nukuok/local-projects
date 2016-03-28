@@ -12,5 +12,6 @@
   :components ((:file "package")
                (:module "src"
                 :components
-                ((:file "custom-tools"))))
+                ((:file "string-tools")
+		 (:file "custom-tools"))))
   :in-order-to ((test-op (load-op custom-tools))))

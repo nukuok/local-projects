@@ -42,3 +42,4 @@
 (defun uniquep (element list)
   (= (- (length list) 1)
      (length (remove element list :test #'equal))))
+
