@@ -13,5 +13,7 @@
                (:module "src"
                 :components
                 (;(:file "string-tools")
+		 (:file "comment-extract")
+		 (:file "json-related")
 		 (:file "custom-tools"))))
   :in-order-to ((test-op (load-op custom-tools))))

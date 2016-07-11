@@ -26,7 +26,7 @@
 
 
 (defvar *debug-switch*)
-(setf *debug-switch* t)
+(setf *debug-switch* nil)
   
 (defmacro debug (message &rest parameters)
   `(when *debug-switch*
