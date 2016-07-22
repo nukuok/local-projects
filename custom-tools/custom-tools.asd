@@ -14,6 +14,8 @@
                 :components
                 (;(:file "string-tools")
 		 (:file "comment-extract")
+		 (:file "html-related")
+		 (:file "string-related")
 		 (:file "json-related")
 		 (:file "custom-tools"))))
   :in-order-to ((test-op (load-op custom-tools))))

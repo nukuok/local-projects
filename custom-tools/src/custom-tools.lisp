@@ -43,3 +43,5 @@
   (= (- (length list) 1)
      (length (remove element list :test #'equal))))
 
+(defun last-1 (mame)
+  (car (last mame)))
